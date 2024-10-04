@@ -1,0 +1,318 @@
+const express = require("express");
+const app = express();
+const mongoose = require("mongoose");
+const Listing = require("./models/listing.js");
+const FListing = require("./models/Flisting.js");
+const methodOverride = require("method-override");
+const path = require("path");
+const multer = require('multer');
+const ejsMate = require("ejs-mate");
+const Flisting = require('./models/Flisting');  // Import the Flisting model
+
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js"); 
+
+const wrapAsync = require("./utils/wrapAsync");
+
+// __________________________________________________________
+
+const session = require('express-session'); 
+const flash = require('connect-flash');
+
+
+
+
+const sessionOption ={
+    secret: "mysupersecretcode",
+    resave: false,     
+    saveUninitialized: true,
+    cookie : {
+        expire: Date.now() * 7 * 24 * 60 * 60 * 1000,
+        maxAge:  7 * 24 * 60 * 60 * 1000,
+    },
+};
+
+
+app.use(session(sessionOption));
+app.use(flash());
+
+
+
+//for passport authentication
+app.use(passport.initialize());
+app.use(passport.session()); 
+passport.use(new LocalStrategy(User.authenticate())); 
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+
+
+
+
+
+
+
+
+// ___________________________________________________________
+
+const MONGO_URL = 'mongodb://localhost:27017/influencerhub';
+main()
+  .then (() => {
+    console.log("connected to DB");
+ })
+ .catch ((err) =>{
+    console.log(err);
+ });
+
+
+async function main() {
+    await mongoose.connect(MONGO_URL)
+
+}
+
+
+// ____________________________________________________________________________________
+// store image in public image folder
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/images'); // Save in public/images folder
+    },
+    filename: (req, file, cb) => {
+        // Set the file name
+        cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to avoid name clashes
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// __________________________________________________________________________________
+
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.urlencoded({extended: true}));
+app.use(methodOverride("_method"));
+app.engine("ejs",ejsMate);
+app.use(express.static(path.join(__dirname,"/public")));
+
+
+
+// ____________________________________________________________________________________________
+
+
+            //  routes
+
+
+// _______________________________________________
+// /home page
+app.get("/", (req, res) => {
+    res.render("Hlistings/home.ejs");
+});
+
+
+// _______________________________________________
+//  influencer page
+app.get("/influencers", (req,res) => {
+    res.send("hii influencers");
+});
+
+// ______________________________________________________________________________________
+// signup page
+
+// Route to render signup page
+app.get("/signup", (req, res) => {
+    res.render("user/signup.ejs");
+});
+
+// Route to handle signup form submission
+app.post("/signup", wrapAsync(async (req, res, next) => {
+    try {
+        const { username, email, password, role } = req.body;  // Destructure form data
+        const newUser = new User({ username, email, role });   // Create new user with role
+        const registeredUser = await User.register(newUser, password);  // Register user and hash password
+        
+        console.log(registeredUser);  // Log registered user info
+        
+        req.login(registeredUser, (err) => {  // Automatically log in the user
+            if (err) {
+                return next(err);  // Pass error to next middleware if login fails
+            }
+            req.flash("success", "Welcome to Farmhouse Gateway!");  // Success message
+            return res.redirect("/login");  // Redirect to listings page after successful registration and login
+        });
+    } catch (e) {
+        console.log(e)
+        req.flash("error", e.message);  // Handle any errors (e.g., user already exists)
+        return res.redirect("/signup");  // Redirect back to signup page if error occurs
+    }
+}));
+
+
+
+// _______________________________________________________________________________________________
+
+// login page
+
+
+
+
+app.get("/login", (req, res) => {
+    res.render("user/login.ejs");
+});
+
+app.post("/login", passport.authenticate('local', { failureFlash: true, failureRedirect: "/login" }), (req, res) => {
+    const { role } = req.user; // Extract role from authenticated user
+    req.flash("success", `Welcome back, ${req.user.username}!`);
+
+    // Redirect based on the role
+    if (role === "user") {
+        res.redirect("/influencers"); // User page
+    } else if (role === "company") {
+        res.redirect("/listings"); // Company page
+    } else if (role === "freelancer") {
+        res.redirect("/freelancers"); // Freelancer page
+    } else {
+        res.redirect("/"); // Fallback
+    }
+});
+
+
+
+
+
+
+
+
+
+
+// ____________________________________________________________
+//index route
+// route for listing
+app.get("/listings", async (req,res) =>{
+    const allListings = await Listing.find({});
+    res.render('listings/index.ejs',{allListings});
+    });
+
+
+// route for Flisting
+app.get("/freelancers", async (req, res) => {
+    const allFreelancers = await FListing.find({});
+    res.render('Flistings/index.ejs', { allFreelancers });
+    });
+    
+
+
+
+// ____________________________________________________________
+
+//new company route
+app.get("/listings/new",(req,res)=>{
+    res.render('listings/new.ejs');
+ });
+
+ 
+ //new freelancer route
+ app.get("/freelancers/new",(req,res)=>{
+    res.render('Flistings/new.ejs');
+ });
+
+
+
+// ____________________________________________________________
+// create company route
+app.post('/listings', upload.single('listing[image]'), async (req, res) => {
+    console.log(req.body); // Check if form data is received
+    try {
+        // Create a listing object
+        const listingData = {
+            title: req.body.listing.title,
+            description: req.body.listing.description,
+            contact: req.body.listing.contact,
+            eligibility: req.body.listing.eligibility,
+            image: {
+                filename: req.file.filename, // Save the uploaded filename
+                url: `/images/${req.file.filename}` // Set the URL for the image
+            }
+        };
+
+        const listing = new Listing(listingData);
+        await listing.save();
+        res.redirect(`/listing/${listing._id}`);
+    } catch (e) {
+        console.log(e);
+        res.redirect('/listings/new'); // Redirect back to form if validation fails
+    }
+});
+
+
+
+
+// create freelancer route
+app.post('/freelancers', async (req, res) => {
+    console.log(req.body);  // Check if form data is received
+    try {
+        const flisting = new Flisting(req.body.flisting);  // Use the correct path for the freelancer form data
+        await flisting.save();  // Save the new freelancer listing to the database
+        res.redirect(`/freelancers/${flisting._id}`);  // Redirect to the specific freelancer page after saving
+    } catch (e) {
+        console.log(e);  // Log any errors for debugging
+        res.redirect('/freelancers/new');  // Redirect back to the form if something goes wrong
+    }
+});
+
+
+
+// ____________________________________________________________
+// edit route
+app.get("/listings/:id/edit", async(req,res) =>{
+    let {id} = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/edit.ejs",{listing});
+});
+
+// ____________________________________________________________
+// update route
+app.put("/listings/:id",async(req,res) =>{
+    let {id} =req.params; 
+    await Listing.findByIdAndUpdate(id,{ ...req.body.listing});
+    res.redirect(`/listing/${id}`);
+});
+//________________________________________________________________________________________
+//Delete route
+app.delete("/listings/:id", async(req,res) =>{
+    let {id} = req.params;
+    let deletedListing = await  Listing.findByIdAndDelete(id);
+    console.log(deletedListing);
+    res.redirect("/listings");
+});
+
+ // ____________________________________________________________
+//show compnay route
+// route 2
+
+app.get("/listing/:id", async(req, res) =>{
+    let {id} = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/show.ejs", { listing });
+});
+
+//show freelancer route
+app.get("/freelancer/:id", async (req, res) => {
+    let { id } = req.params;
+    const freelancer = await Flisting.findById(id);  // Use Flisting model
+    res.render("Flistings/show.ejs", { freelancer });  // Render show.ejs for freelancer
+});
+
+
+
+
+
+
+
+
+app.listen(8080, () => {
+    console.log("server is listening port 8080");
+});

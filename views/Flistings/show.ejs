@@ -1,0 +1,34 @@
+<% layout("/layouts/boilerplate") %>
+<div class="row">
+  <div class="col-7 offset-2">
+
+<body>
+    <h3>Freelancer Details</h3>
+
+    <div class="showcard">
+        <!-- Freelancer image -->
+        <img src="<%= freelancer.image.url  %>" class="card-img-top show-image" alt="Freelancer Image">
+        
+        <div class="card-body">
+            <p class="card-text">
+                <li><b>Name</b> = <%= freelancer.name %></li>
+                <li><b>Role</b> = <%= freelancer.role %></li>
+                <li><b>Location</b> = <%= freelancer.location %></li>
+            </p>
+        </div>
+    </div>
+
+    <br>
+    <div class="button-container">
+        <button class="btn btn-dark add-btn1 save-btn1">
+            <a class="listing-link" href="/freelancers/<%= freelancer._id %>/edit">Edit this Freelancer</a>
+        </button>
+        <br>
+        <form method="POST" action="/freelancers/<%= freelancer._id %>?_method=DELETE" class="delete-form">
+            <button class="btn btn-dark add-btn save-btn1">DELETE</button>
+        </form>
+    </div>
+</body>
+</div>
+</div>
+</html>
