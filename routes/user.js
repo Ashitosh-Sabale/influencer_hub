@@ -4,10 +4,10 @@ const path = require('path');
 const {auth,oauth2Client}=require("../functions/youtubeAuth");
 const {videos,channelInfo}=require("../functions/youtubedata");
 var channelId="";
-const User = require("../models/user.js"); 
+const User = require("../models/influencer.js"); 
 const {findMostPopularContent,calculateEngagementRate}=require("../functions/analytics.js")
 const multer = require('multer');
-
+const user= require("../models/user.js")
 
 
 
@@ -34,10 +34,12 @@ router.get('/home', async (req, res) => {
   console.log(req.user.username)
   try {
     // Fetch user data (assuming logged-in user details are available)
-    const user = await User.findByUsername( req.user.username); // req.user should have logged-in user details
+    const user = await User.findOne( {username:req.user.username}); // req.user should have logged-in user details
     console.log(user)
     if (!user) {
-      return res.status(404).send('User not found');
+      const user= new User({username:req.user.username});
+      await user.save();
+      return res.render("influencer/Home",{username: req.user.username,profilePic: null,bio: null});
     }
 
     // Render the homepage EJS template
@@ -54,7 +56,7 @@ router.get('/home', async (req, res) => {
 
 router.get('/profile', async (req, res) => {
   try {
-    const user = await User.findByUsername(req.user.username);
+    const user = await User.findOne({username: req.user.username});
     const profileComplete = user.bio && user.profilePic ;
     res.locals.profilPic=user.profilPic;
     res.render('influencer/profile', {
@@ -137,27 +139,13 @@ router.get('/channel', async (req, res) => {
     }
   });
 
-
-  router.get('/profile/:username', async (req, res) => {
-      try {
-        const user = await Influencer.findOne({ email: req.params.username });
-    
-        if (!user) {
-          return res.status(404).send('User not found');
-        }
-    
-        // Render the EJS template and pass user data to the view
-        res.render('profile', {
-          username: user.name,
-          bio: user.bio,
-          profilePic: user.profilePic,
-          socialMedia: user.socialMedia,
-          engagementRate: user.engagements,
-          growthRate: user.analytics.growthRate
-        });
-      } catch (error) {
-        res.status(500).send('Error fetching user profile');
-      }
-    });
-
+router.get("/premium",(req,res)=>{
+   res.render("influencer/premium")
+})
+router.post("/premium",async(req,res)=>{
+  await user.findOneAndUpdate({ username: req.user.username }, {
+   'premium': true
+  });
+  res.redirect("/user/home");
+})
 module.exports= router;

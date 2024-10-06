@@ -13,12 +13,17 @@ const Flisting = require('./models/Flisting');  // Import the Flisting model
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js"); 
+const Freelancer=require('./models/Flisting');
+const companyschema=require('./models/listing.js');
 
 const wrapAsync = require("./utils/wrapAsync");
 const ensureAuthenticated = require('./middleware/isauth.js');
+const ensureAuthUser = require('./middleware/authuser.js');
+const checkPremium = require('./middleware/checkPremium.js');
 
 const user=require("./routes/user");
 const company=require("./routes/company.js");
+const freelancer=require("./routes/freelancer.js")
 // __________________________________________________________
 
 const session = require('express-session'); 
@@ -112,8 +117,9 @@ app.use(express.static(path.join(__dirname,"/public")));
 
 // ____________________________________________________________________________________________
 
-app.use("/user",ensureAuthenticated,user);
+app.use("/user",ensureAuthenticated,ensureAuthUser, user);
 app.use("/company",ensureAuthenticated,company);
+app.use("/freelancer",ensureAuthenticated,freelancer);
 // _______________________________________________
 // /home page
  app.get("/",ensureAuthenticated, (req, res) => {
@@ -138,8 +144,8 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
     try {
         const { username, email, password, role } = req.body;  // Destructure form data
         const newUser = new User({ username, email, role });   // Create new user with role
-        const registeredUser = await User.register(newUser, password);  // Register user and hash password
-        
+       
+        const registeredUser = await User.register(newUser, password);
         console.log(registeredUser);  // Log registered user info
         
         req.login(registeredUser, (err) => {  // Automatically log in the user
@@ -173,18 +179,28 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", passport.authenticate('local', { failureFlash: true, failureRedirect: "/login" }), async(req, res) => {
-    const reqrole=req.user.role; // Extract role from authenticated user
-    const { role } = await User.findOne({username: req.user.username}); // Extract role from authenticated user
+    const reqrole=req.body.role; 
+    console.log(reqrole);// Extract role from authenticated user
+    // Extract role from authenticated user
+    const {role}=await User.findOne({username: req.user.username})
  
     req.flash("success_msg", `Welcome back, ${req.user.username}!`);
    if(reqrole==role){
     // Redirect based on the role
-        if (role === "user") {
-            res.redirect("/user/home"); 
-        } else if (role === "company") {
-            res.redirect("/listings"); // Company page
-        } else if (role === "freelancer") {
-            res.redirect("/home"); // Freelancer page
+        if (reqrole === "user") {
+                res.redirect("/user/home");
+            
+             
+        } else if (reqrole === "company") {
+            
+                res.redirect("/company/profile");
+        
+             
+        } else if (reqrole === "freelancer") {
+            
+                res.redirect("/freelancer/profile");
+           
+             
         } else {
             res.redirect("/"); // Fallback
         }}
@@ -211,14 +227,14 @@ app.get('/logout', (req, res, next) => {
 // ____________________________________________________________
 //index route
 // route for listing
-app.get("/listings", async (req,res) =>{
+app.get("/listings",checkPremium, async (req,res) =>{
     const allListings = await Listing.find({});
     res.render('listings/index.ejs',{allListings});
     });
 
 
 // route for Flisting
-app.get("/freelancers", async (req, res) => {
+app.get("/freelancers", checkPremium,async (req, res) => {
     const allFreelancers = await FListing.find({});
     res.render('Flistings/index.ejs', { allFreelancers });
     });
@@ -284,6 +300,11 @@ app.post('/freelancers', async (req, res) => {
 });
 
 
+app.get("/freelancers", ensureAuthenticated,async (req, res) => {
+    const allFreelancers = await FListing.find({});
+    res.render('Flistings/index.ejs', { allFreelancers });
+    });
+    
 
 // ____________________________________________________________
 // edit route
@@ -325,7 +346,6 @@ app.get("/freelancer/:id", async (req, res) => {
     const freelancer = await Flisting.findById(id);  // Use Flisting model
     res.render("Flistings/show.ejs", { freelancer });  // Render show.ejs for freelancer
 });
-
 
 
 

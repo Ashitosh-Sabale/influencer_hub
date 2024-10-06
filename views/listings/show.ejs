@@ -13,10 +13,10 @@
         <img src="<%= listing.image.url%>" class="card-img-top show-image" alt="Listing_image">
       <div class="card-body">
         <p class="card-text">
-            <li><b>TITLE</b> = <%= listing.title %></li>
-            <li><b>CONTACT</b> = <%= listing.contact %></li>
-            <li><b>ELIGIBILITY(follwers) </b>= <%= listing.eligibility %>K</li>
-            <li><b>DESCRIPTION</b> = <%= listing.description %></li>
+            <li><b>TITLE</b> : <%= listing.title %></li>
+            <li><b>CONTACT</b> : <%= listing.contact %></li>
+            <li><b>ELIGIBILITY(follwers) </b>: <%= listing.eligibility %>K</li>
+            <li><b>DESCRIPTION</b> : <%= listing.description %></li>
             
            
         </p>
@@ -26,13 +26,10 @@
     <br>
     <div class="button-container">
         <button class="btn btn-dark add-btn1 save-btn1">
-            <a class="listing-link" href="/listings/<%= listing._id%>/edit">Edit this Listing</a>
+            <a class="listing-link" href="/listings/<%= listing._id%>/edit">Edit profile</a>
         </button>
         <br>
-        <form method="POST" action="/listings/<%=listing._id%>?_method=DELETE" class="delete-form">
-            <button class="btn btn-dark add-btn save-btn1">DELETE</button>
-        </form>
-
+        
     </div>
 </div>
     </div>

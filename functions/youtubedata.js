@@ -88,7 +88,7 @@ async function videos(oauth2Client) {
                     views: video.statistics.viewCount,
                     likes: video.statistics.likeCount,
                     comments:video.statistics.commentCount,
-                    engagementRate: engagementRate,
+                    engagementRate: engagementRate.toFixed(2),
                     thumbnail: video.snippet.thumbnails.high.url
                 });
             });

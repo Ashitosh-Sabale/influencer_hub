@@ -8,7 +8,7 @@
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
           <a class="nav-link " href="/">Home</a>
-          <a class="nav-link" href="/influencers">Influencer</a>
+          <a class="nav-link" href="/company/home">Influencer</a>
 
           <!-- Company Dropdown -->
           <div class="nav-item dropdown">
@@ -17,28 +17,21 @@
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
               <li><a class="dropdown-item" href="/listings">View Listings</a></li>
-              <li>
-                <form method="GET" action="/listings/new" style="margin: 0;">
-                  <button type="submit" class="dropdown-item">Add New</button>
-                </form>
-              </li>
+              
             </ul>
           </div>
           
           <!-- <a class="nav-link" href="/freelancers">Freelancers</a> -->
 
         <!-- Freelancer Dropdown -->
-<div class="nav-item dropdown">
+
+        <div class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" id="freelancerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Freelancers
   </a>
   <ul class="dropdown-menu" aria-labelledby="freelancerDropdown">
     <li><a class="dropdown-item" href="/freelancers">View Freelancers</a></li>
-    <li>
-      <form method="GET" action="/freelancers/new" style="margin: 0;">
-        <button type="submit" class="dropdown-item">Add New</button>
-      </form>
-    </li>
+    
   </ul>
 </div>
 
@@ -52,11 +45,11 @@
         <!-- Premium Button -->
         <div style="margin-left: auto; margin-right: 20px;">
           <!-- <div style="margin-left: auto; text-align: center;"> -->
-            <a class="navbar-brand" href="/influencers">
+            <a class="navbar-brand" href="/company/influencers">
               <i class="fa-solid fa-user" style="font-size: 24px;"></i>
             </a>
            <% if(username){ %>
-                  <a href="#" style="display: block; font-size: 14px; color: black;">
+                  <a href="/user/profile" style="display: block; font-size: 14px; color: black;">
                     <%= username %></a>
            <% } %>
           </div>

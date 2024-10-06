@@ -1,5 +1,19 @@
 <% layout("/layouts/boilerplate") %>
+<style>
+.card {
+  border: 2px solid rgb(74, 69, 69); /* Existing solid border */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+  transition: box-shadow 0.3s; /* Smooth transition on hover */
 
+}
+.card-body{
+  margin-left: 5px;
+}
+.card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Darker shadow on hover */
+}
+</style>
 
 <body class="c-flex  vh-100">
     <header><div class="container text-center">
@@ -11,8 +25,8 @@
           <h5 class="card-title"><%= channel.title %></h5>
           <p class="card-text">Channel ID: <strong><%= channel.id %></strong></p>
           <p class="card-text"><%= channel.description %></p>
-          <p class="card-text">views : <%= channel.views %></p>
-          <p class="card-text">Subscribers : <%= channel.subscribers %></p>
+          <p class="card-text">views : <b><%= channel.views %></b></p>
+          <p class="card-text">Subscribers : <b><%= channel.subscribers %></b></p>
         </div>
       </div>
     </div>
@@ -24,10 +38,10 @@
           <img src="<%= mostPopularContent.thumbnail %>" class="card-img-top" alt="Video Thumbnail">
           <div class="card-body">
             <h5 class="card-title"><%= mostPopularContent.title %></h5>
-            <p class="card-text">Views: <%= mostPopularContent.views %></p>
-            <p class="card-text">Likes: <%= mostPopularContent.likes %></p>
-            <p class="card-text">Comments: <%= mostPopularContent.comments %></p>
-            <p class="card-text">EngagementRate: <%= mostPopularContent.engagementRate %></p>
+            <p class="card-text">Views:<b> <%= mostPopularContent.views %></b></p>
+            <p class="card-text">Likes:<b> <%= mostPopularContent.likes %></b></p>
+            <p class="card-text">Comments:<b> <%= mostPopularContent.comments %></b></p>
+            <p class="card-text">EngagementRate:<b> <%= mostPopularContent.engagementRate %></b></p>
             <p class="card-text"><%= mostPopularContent.description %></p>
           
           </div>
@@ -40,7 +54,7 @@
       <% if(videosList.length>0) { %>
         <div class="row">
         <% videosList.forEach(function(video) { %>
-          <div class="col-md-4 mb-4">
+          <div class="col-md-4 mb-4 "">
             <div class="card">
               <img src="<%= video.thumbnail %>" class="card-img-top" alt="Video Thumbnail">
               <div class="card-body">

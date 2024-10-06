@@ -1,17 +1,19 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+
 const flistingSchema = new Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    
-    role: {
-        type: String,
-        required: true,
-    },
-    
+    username: {type:String, required: true},
+    role: [String],
+    skills: [String],
+    appliedJobs: [{ 
+        job: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Job'
+        }
+      }]
+    ,
+    portfolio:{type: String}, 
     image: {
         filename: {
             type: String,
@@ -27,9 +29,10 @@ const flistingSchema = new Schema({
 
     location: {
         type: String,
-        required: true,
+      
     }
 });
+  
 
 const Flisting = mongoose.model("Flisting", flistingSchema);
 module.exports = Flisting;

@@ -1,6 +1,5 @@
-<% layout("/layouts/boilerplate") %>
-
-<body>
+<% layout("/layouts/boilerplate") %><body>
+  <body>
 
     <div class="container">
       <div class="row justify-content-center">
@@ -14,33 +13,61 @@
         </div>
       </div>
   
-      <!-- Profile Section -->
+      <!-- Profile Section and Analytics Section -->
       <div class="row">
-        <div class="col-md-6">
+        <!-- Profile Section (30-40% width) -->
+        <div class="col-md-4">
           <div class="card">
             <div class="card-body text-center">
               <img src="/profilePic/<%= profilePic %>" class="rounded-circle mb-3" alt="Profile Picture" width="150" height="150">
               <h5 class="card-title"><%= username %></h5>
-              
-             
               <a href="/user/profile" class="btn btn-primary action-btn">Update Profile</a>
             </div>
           </div>
         </div>
   
-        <!-- Analytics Section -->
-        <div class="col-md-6">
+        <!-- Analytics Section (60-70% width) -->
+        <div class="col-md-8">
           <div class="card">
             <div class="card-body text-center">
               <h5 class="card-title">Analytics</h5>
               <p>Check your social media analytics and engagement metrics.</p>
-              <a href="/user/auth" class="btn btn-info action-btn">View Analytics</a>
-              <a href="/performance" class="btn btn-success action-btn">Performance Stats</a>
+  
+              <!-- Row for YouTube and Instagram Analytics -->
+              <div class="row">
+                <div class="col-md-6">
+                  <a href="/user/auth" class="btn btn-danger action-btn btn-block">
+                    <i class="fab fa-youtube"></i> YouTube Analytics
+                  </a>
+                </div>
+                <div class="col-md-6">
+                  <a href="/analytics/instagram" class="btn btn-warning action-btn btn-block">
+                    <i class="fab fa-instagram"></i> Instagram Analytics
+                  </a>
+                </div>
+              </div>
+  
+              <!-- Row for Facebook Analytics and Performance Stats -->
+              <div class="row mt-3">
+                <div class="col-md-6">
+                  <a href="/analytics/facebook" class="btn btn-primary action-btn btn-block">
+                    <i class="fab fa-facebook"></i> Facebook Analytics
+                  </a>
+                </div>
+                <div class="col-md-6">
+                  <a href="/performance" class="btn btn-success action-btn btn-block">
+                    <i class="fas fa-chart-line"></i> Performance Stats
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  
+    <!-- FontAwesome Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>

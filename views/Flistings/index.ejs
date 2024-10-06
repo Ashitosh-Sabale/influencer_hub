@@ -16,6 +16,10 @@
                     <p class="card-text">
                       <b><%= freelancer.name %></b> <br>
                       <%= freelancer.role %> <br>
+                      <strong>Skills:</strong>
+                      <% freelancer.skills.forEach(skill => { %>
+                        <span><%= skill %></span>
+                      <% }); %>
                       
                     </p>
                   </div>
