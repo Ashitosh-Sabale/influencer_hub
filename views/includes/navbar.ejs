@@ -55,11 +55,13 @@
             <a class="navbar-brand" href="/influencers">
               <i class="fa-solid fa-user" style="font-size: 24px;"></i>
             </a>
-            <a href="#" style="display: block; font-size: 14px; color: black;">
-              USER
-            </a>
+           <% if(username){ %>
+                  <a href="#" style="display: block; font-size: 14px; color: black;">
+                    <%= username %></a>
+           <% } %>
           </div>
-          
+          <a href="/logout" class="btn btn-danger">Logout</a>
+
           <a href="/premium" class="btn" style="background-color: rgb(233, 41, 41); color: white; padding: 2px 6px; border-radius: 10px; font-weight: bold;">Premium</a>
         </div>
 

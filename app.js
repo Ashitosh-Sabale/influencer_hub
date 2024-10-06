@@ -1,4 +1,5 @@
 const express = require("express");
+const { google } = require('googleapis');
 const app = express();
 const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
@@ -14,7 +15,10 @@ const LocalStrategy = require("passport-local");
 const User = require("./models/user.js"); 
 
 const wrapAsync = require("./utils/wrapAsync");
+const ensureAuthenticated = require('./middleware/isauth.js');
 
+const user=require("./routes/user");
+const company=require("./routes/company.js");
 // __________________________________________________________
 
 const session = require('express-session'); 
@@ -34,9 +38,15 @@ const sessionOption ={
 };
 
 
+
+
 app.use(session(sessionOption));
 app.use(flash());
-
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    next();
+});  
 
 
 //for passport authentication
@@ -57,7 +67,7 @@ passport.deserializeUser(User.deserializeUser());
 
 // ___________________________________________________________
 
-const MONGO_URL = 'mongodb://localhost:27017/influencerhub';
+const MONGO_URL = 'mongodb://localhost:27017/InfluencerHub';
 main()
   .then (() => {
     console.log("connected to DB");
@@ -102,29 +112,25 @@ app.use(express.static(path.join(__dirname,"/public")));
 
 // ____________________________________________________________________________________________
 
-
-            //  routes
-
-
+app.use("/user",ensureAuthenticated,user);
+app.use("/company",ensureAuthenticated,company);
 // _______________________________________________
 // /home page
-app.get("/", (req, res) => {
+ app.get("/",ensureAuthenticated, (req, res) => {
     res.render("Hlistings/home.ejs");
 });
 
 
 // _______________________________________________
 //  influencer page
-app.get("/influencers", (req,res) => {
-    res.send("hii influencers");
-});
+
 
 // ______________________________________________________________________________________
 // signup page
 
 // Route to render signup page
 app.get("/signup", (req, res) => {
-    res.render("user/signup.ejs");
+    res.render("user/signup.ejs",{username:"user"});
 });
 
 // Route to handle signup form submission
@@ -140,12 +146,12 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
             if (err) {
                 return next(err);  // Pass error to next middleware if login fails
             }
-            req.flash("success", "Welcome to Farmhouse Gateway!");  // Success message
+            req.flash('success_msg', 'Your form was successfully submitted!');  // Success message
             return res.redirect("/login");  // Redirect to listings page after successful registration and login
         });
     } catch (e) {
         console.log(e)
-        req.flash("error", e.message);  // Handle any errors (e.g., user already exists)
+        req.flash("error_msg", e.message);  // Handle any errors (e.g., user already exists)
         return res.redirect("/signup");  // Redirect back to signup page if error occurs
     }
 }));
@@ -156,27 +162,41 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
 
 // login page
 
-
+app.use("/",(req, res, next) => {
+    res.locals.username = req.user ? req.user.username : null;  // Makes 'username' available in all views
+    next();
+  });
 
 
 app.get("/login", (req, res) => {
     res.render("user/login.ejs");
 });
 
-app.post("/login", passport.authenticate('local', { failureFlash: true, failureRedirect: "/login" }), (req, res) => {
-    const { role } = req.user; // Extract role from authenticated user
-    req.flash("success", `Welcome back, ${req.user.username}!`);
-
+app.post("/login", passport.authenticate('local', { failureFlash: true, failureRedirect: "/login" }), async(req, res) => {
+    const reqrole=req.user.role; // Extract role from authenticated user
+    const { role } = await User.findOne({username: req.user.username}); // Extract role from authenticated user
+ 
+    req.flash("success_msg", `Welcome back, ${req.user.username}!`);
+   if(reqrole==role){
     // Redirect based on the role
-    if (role === "user") {
-        res.redirect("/influencers"); // User page
-    } else if (role === "company") {
-        res.redirect("/listings"); // Company page
-    } else if (role === "freelancer") {
-        res.redirect("/freelancers"); // Freelancer page
-    } else {
-        res.redirect("/"); // Fallback
+        if (role === "user") {
+            res.redirect("/user/home"); 
+        } else if (role === "company") {
+            res.redirect("/listings"); // Company page
+        } else if (role === "freelancer") {
+            res.redirect("/home"); // Freelancer page
+        } else {
+            res.redirect("/"); // Fallback
+        }}
+});
+
+app.get('/logout', (req, res, next) => {
+  req.logout(function(err) {  // The callback is needed for newer versions of Passport.js
+    if (err) { 
+      return next(err); 
     }
+    res.redirect('/login');  // Redirect to the login page or home after logout
+  });
 });
 
 
@@ -305,9 +325,6 @@ app.get("/freelancer/:id", async (req, res) => {
     const freelancer = await Flisting.findById(id);  // Use Flisting model
     res.render("Flistings/show.ejs", { freelancer });  // Render show.ejs for freelancer
 });
-
-
-
 
 
 
