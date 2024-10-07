@@ -73,7 +73,7 @@ router.post('/profile', upload.single('image'), async (req, res) => {
       } else {
         // If no profile exists, create a new one
         flisting = new Freelancer({
-          user: userId,
+          username: username,
           role,
           location,
           skills: skills.split(',').map(skill => skill.trim()),
@@ -101,6 +101,5 @@ router.post('/profile', upload.single('image'), async (req, res) => {
     res.render('Flistings/index.ejs', { allFreelancers });
     });
     
-
 
 module.exports= router;
