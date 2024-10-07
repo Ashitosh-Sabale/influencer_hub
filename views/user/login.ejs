@@ -46,7 +46,26 @@
             <!-- Submit Button -->
             <button class="col-6 offset-3 btn btn-primary">Login</button>
             <br><br>
-            <p></p>
+            <p>
+              Don't have an account? <a href="http://localhost:8080/signup" class="btn btn-link">Create an account - Signup</a>
+            </p>
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                const flashMessages = document.querySelectorAll('.flash-message');
+            
+                // Show the flash messages when the page loads (if they exist)
+                flashMessages.forEach((message) => {
+                  message.classList.add('show');
+            
+                  // Hide the flash message after 3 seconds
+                  setTimeout(() => {
+                    message.classList.remove('show');
+                  }, 3000); // 3000ms = 3 seconds
+                });
+              });
+            </script>
+            
+            
         </form>
     </div>
 </div>
