@@ -1,16 +1,16 @@
 <% layout("/layouts/boilerplate") %>
-<% if (success_msg) { %>
+<!-- <% if (success_msg) { %>
     <div class="alert alert-success">
       <%= success_msg %>
     </div>
-  <% } %>
+  <% } %> -->
 
   <!-- Error Flash Message -->
-  <% if (error_msg) { %>
+  <!-- <% if (error_msg) { %>
     <div class="alert alert-danger">
       <%= error_msg %>
     </div>
-  <% } %>
+  <% } %> -->
 
 
 <div class="row mt-3">
@@ -46,7 +46,9 @@
             <!-- Submit Button -->
             <button class="col-6 offset-3 btn btn-primary">Login</button>
             <br><br>
-            <p></p>
+            <p>
+              Don't have an account? <a href="http://localhost:8080/signup" class="btn btn-link">create an account - signup</a>
+            </p>
         </form>
     </div>
 </div>
