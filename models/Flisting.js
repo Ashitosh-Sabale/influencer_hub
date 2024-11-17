@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const flistingSchema = new Schema({
     username: {type:String, required: true},
+    email: { type: String, unique: true, sparse: true },  
     role: [String],
     skills: [String],
     appliedJobs: [{ 

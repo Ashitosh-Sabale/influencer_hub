@@ -50,7 +50,7 @@ router.post('/profile', upload.single('image'), async (req, res) => {
     try {
       const { role, location, skills, portfolio } = req.body;
       const username = req.user.username;
-  
+      const email = req.user.email || null;
       // Find if the freelancer profile already exists for the user
       let flisting = await Freelancer.findOne({ username: username });
   
@@ -75,6 +75,7 @@ router.post('/profile', upload.single('image'), async (req, res) => {
         flisting = new Freelancer({
           username: username,
           role,
+          email,
           location,
           skills: skills.split(',').map(skill => skill.trim()),
           portfolio,

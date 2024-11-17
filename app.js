@@ -15,6 +15,7 @@ const LocalStrategy = require("passport-local");
 const User = require("./models/user.js"); 
 const Freelancer=require('./models/Flisting');
 const companyschema=require('./models/listing.js');
+const Message = require('./models/message');  
 
 const wrapAsync = require("./utils/wrapAsync");
 const ensureAuthenticated = require('./middleware/isauth.js');
@@ -24,6 +25,21 @@ const checkPremium = require('./middleware/checkPremium.js');
 const user=require("./routes/user");
 const company=require("./routes/company.js");
 const freelancer=require("./routes/freelancer.js")
+
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+
+
+const cors = require("cors")
+// for connecting with react 
+// Enable CORS for all routes
+// app.use(cors({
+//   origin: 'http://localhost:3000', // Allow requests from your React app
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific methods
+//   credentials: true, // Allow credentials like cookies if needed
+// }));
 // __________________________________________________________
 
 const session = require('express-session'); 
@@ -53,6 +69,7 @@ app.use((req, res, next) => {
     next();
 });  
 
+app.use(express.json());
 
 //for passport authentication
 app.use(passport.initialize());
@@ -122,7 +139,7 @@ app.use("/company",ensureAuthenticated,company);
 app.use("/freelancer",ensureAuthenticated,freelancer);
 // _______________________________________________
 // /home page
- app.get("/",ensureAuthenticated, (req, res) => {
+ app.get("/", (req, res) => {
     res.render("Hlistings/home.ejs");
 });
 
@@ -346,10 +363,48 @@ app.get("/freelancer/:id", async (req, res) => {
     const freelancer = await Flisting.findById(id);  // Use Flisting model
     res.render("Flistings/show.ejs", { freelancer });  // Render show.ejs for freelancer
 });
+// for socket io message connection
+io.on('connection', (socket) => {
+    console.log('New user connected');
 
+    // Listen for incoming messages
+    socket.on('chatMessage', async (data) => {
+        const newMessage = new Message({
+            sender: data.sender,
+            receiver: data.receiver,
+            message: data.message,
+        });
 
+        await newMessage.save(); // Save the message to the database
 
+        // Emit the message back to both sender and receiver
+        io.emit('message', data);
+    });
 
-app.listen(8080, () => {
-    console.log("server is listening port 8080");
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
+// analytics
+
+app.get("/analytics/instagram", (req, res) => {
+    res.render("user/instagram"); // Simple response with "Coming Soon"
+});
+
+app.get("/analytics/facebook", (req, res) => {
+    res.render("user/instagram"); // Simple response with "Coming Soon"
+});
+
+app.get("/performance", (req, res) => {
+    res.render("user/instagram"); // Simple response with "Coming Soon"
+});
+
+//
+app.get("/chat/:user",(req,res)=>{
+    res.render("user/chat",{username:req.user.username,Receiver: req.params.user});
+})
+// Start the server
+server.listen(8080, () => {
+    console.log('Server is running on port 8080');
 });

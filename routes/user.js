@@ -41,12 +41,28 @@ router.get('/home', async (req, res) => {
       await user.save();
       return res.render("influencer/Home",{username: req.user.username,profilePic: null,bio: null});
     }
-
+    const growthData = [
+      { month: 'January', followers: 150 },
+      { month: 'February', followers: 180 },
+      { month: 'March', followers: 220 },
+      { month: 'April', followers: 300 },
+      { month: 'May', followers: 400 },
+      { month: 'June', followers: 500 }
+    ];
+  
+    const popularContentData = [
+      { category: 'Tutorials', percentage: 40 },
+      { category: 'Product Reviews', percentage: 35 },
+      { category: 'Vlogs', percentage: 25 }
+    ];
     // Render the homepage EJS template
     res.render('influencer/Home', {
       username: user.username,
       bio: user.bio,
       profilePic: user.profilePic,
+      growthData: growthData,
+      popularContentData: popularContentData,
+     
     });
   } catch (error) {
     res.status(500).send(error);
@@ -140,7 +156,7 @@ router.get('/channel', async (req, res) => {
   });
 
 router.get("/premium",(req,res)=>{
-   res.render("influencer/premium")
+   res.render("user/premium")
 })
 router.post("/premium",async(req,res)=>{
   await user.findOneAndUpdate({ username: req.user.username }, {
